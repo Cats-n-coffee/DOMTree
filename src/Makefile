@@ -1,7 +1,7 @@
 IDIR = ../include
 OUTDIR = ../out/treeOut
 CC = g++
-CFLAGS = -std=c++11 -I$(IDIR)
+CFLAGS = -std=c++17 -I$(IDIR)
 
 _DEPS = utils.h parser.h main.h tree.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))

@@ -9,10 +9,10 @@
 class Parser
 {
     public:
-        std::vector<Node> &parsedStack;
-        Parser(std::vector<Node>& stack): parsedStack(stack) {};
-        std::string fileData;
-        std::string currentNode;
+        std::vector<Node*> &parsedStack;
+        Parser(std::vector<Node*>& stack): parsedStack(stack) {};
+        std::string fileData = "";
+        std::string currentNode = "";
 
         void readLinesFromFile();
         void move();

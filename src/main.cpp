@@ -2,7 +2,7 @@
 
 int main()
 {
-    std::vector<Node> parsedStack;
+    std::vector<Node*> parsedStack;
     Parser parser(parsedStack);
     Tree tree(parsedStack);
 

@@ -9,17 +9,18 @@ struct Node {
     std::string nodeType = ""; // ex: <body>
     bool isTagNode = false; // tag vs text
     std::string textContent = ""; // for text nodes?
-    Node *parentNode;
-    std::vector<Node> childNodes;
+    Node *nodeId = nullptr;
+    Node *parentNode = nullptr;
+    std::vector<Node*> childNodes;
 };
 
 class Tree
 {
     public:
-        std::vector<Node> &parsedStack;
-        Tree(std::vector<Node>& stack): parsedStack(stack) {};
+        std::vector<Node*> &parsedStack;
+        Tree(std::vector<Node*>& stack): parsedStack(stack) {};
         
-        Node root;
+        Node *root = nullptr;
 
         void buildTree();
 };
