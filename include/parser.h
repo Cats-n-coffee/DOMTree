@@ -15,8 +15,8 @@ class Parser
         std::string currentNode = "";
 
         void readLinesFromFile();
-        void move();
         void readCharacter(std::string line);
         void buildTag();
         void buildTextNode();
+        std::string getNodeContent(std::string currentNode);
 };

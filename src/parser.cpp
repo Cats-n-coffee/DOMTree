@@ -8,12 +8,6 @@ void Parser::readLinesFromFile()
     this->readCharacter(trimedLine);
 }
 
-// cursor to move on each char, checks for endl
-void Parser::move()
-{
-
-}
-
 // Reads each char and determines tag vs text node
 void Parser::readCharacter(std::string line)
 {
@@ -22,7 +16,7 @@ void Parser::readCharacter(std::string line)
     int index = 0;
 
     while (index < line.length()) {
-        // should verify for each beginning of tag with <
+        // should verify for each beginning of tag with '<'
         if (line[index] == '<') { // html tag beginning
             // we assume that we have a text node before a new html tag
             if (currentNode.length() && !isTag) {
@@ -33,6 +27,7 @@ void Parser::readCharacter(std::string line)
                 std::cout << "Node *newNode " << newNode << " &newNode " << &newNode << std::endl;
                 newNode->isTagNode = false;
                 newNode->nodeType = "text";
+                newNode->nodeContent = currentNode;
                 newNode->nodeId = newNode;
                 newNode->textContent = currentNode;                
             }
@@ -51,7 +46,8 @@ void Parser::readCharacter(std::string line)
             this->parsedStack.push_back(newNode);
             std::cout << "Node *newNode " << newNode << " &newNode " << &newNode << std::endl;
             newNode->isTagNode = true;
-            newNode->nodeType = currentNode;
+            newNode->nodeType = getNodeContent(currentNode);
+            newNode->nodeContent = currentNode;
             newNode->nodeId = newNode;
             newNode->textContent = "";
 
@@ -66,7 +62,19 @@ void Parser::readCharacter(std::string line)
         index++;
     }
 }
-// https://stackoverflow.com/questions/30033582/what-is-the-symbol-for-whitespace-in-c
+// Need to improve once we have HTML attributes
+std::string Parser::getNodeContent(std::string currentNode)
+{
+    std::string nodeName;
+
+    if (currentNode[1] == '/') {
+        nodeName = std::string(currentNode.begin() + 2, currentNode.end() - 1);
+    } else {
+        nodeName = std::string(currentNode.begin() + 1, currentNode.end() - 1);
+    }
+
+    return nodeName;
+}
 
 void Parser::buildTag()
 {
