@@ -23,9 +23,7 @@ void Tree::buildTree()
             (this->parsedStack[i]->isTagNode && !checkIfEndTag(this->parsedStack[i]->nodeContent))
             && (this->parsedStack[i + 1]->isTagNode && !checkIfEndTag(this->parsedStack[i + 1]->nodeContent))
         ) {
-            std::cout << "2 OPEN tags in a row" << std::endl;
             currentNode = this->parsedStack[i];
-            // std::cout << "current node in original " << currentNode << std::endl;
             std::vector<Node*> directChildren = findDirectChildNodes(i, currentDepthLevel, this->parsedStack[i]);
             currentDepthLevel += 1;
             this->parsedStack[i]->depthLevel = currentDepthLevel;
@@ -45,6 +43,7 @@ void Tree::buildTree()
             && (this->parsedStack[i + 1]->isTagNode && !checkIfEndTag(this->parsedStack[i + 1]->nodeContent))
         ) {
             std::cout << "SIBLINGS" << std::endl;
+            // This might be already done with the findDirectChildNodes function
         }
         // if 1 text node and 1 closed: gives the text node's parent.
     }
@@ -80,20 +79,39 @@ std::vector<Node*> Tree::findDirectChildNodes(int currentNodeIndex, int depthLev
             sameNodeTypeInStack += 1;
         }
 
+        // !!!! TODO: improve the reattach of text node to their parent tags
+        // The following assumes that a text node is the first child
+        if ( // Very first node is skipped so we check for currentOpenNode to have a text node
+            (i == firstChildIndex + 1)
+            && !this->parsedStack[i]->isTagNode
+        ) {
+            currentOpenNode->textContent = this->parsedStack[i]->textContent;
+        }
+        if ( // Is a start tag node, and next node (first child) is a text node
+            this->parsedStack[i]->isTagNode
+            && !checkIfEndTag(this->parsedStack[i]->nodeContent)
+            && !this->parsedStack[i + 1]->isTagNode
+            && !this->parsedStack[i + 1]->textContent.length()
+        ) {
+            this->parsedStack[i]->textContent = this->parsedStack[i + 1]->textContent;
+        }
+
         if ( // Check if the current node matches the currentOpenNode type and is an end tag
             this->parsedStack[i]->isTagNode
             && this->parsedStack[i]->nodeType == currentOpenNode->nodeType
             && checkIfEndTag(this->parsedStack[i]->nodeContent)
         ) {
-            if (sameNodeTypeInStack > 0) {
+            if (sameNodeTypeInStack > 0) { // This is NOT the currentOpenNode end tag
                 sameNodeTypeInStack -= 1;
-            } else {
+            } else { // This is the currentOpenNode end tag
                 currentOpenNode->depthLevel = depthLevel + 1;
                 currentOpenNode->parentNode = parentId;
-
+          
                 directChildren.push_back(currentOpenNode);
-
-                if ( // Update the currentOpenNode with the next node if not NULL
+                // ================ If this verifies, 'i' is incremented in the next lines ===========
+                // Update the currentOpenNode with the next node if not NULL, this should respect the 
+                // sibling relationship: 1 closed tag/1 open tag
+                if (
                     this->parsedStack[i + 1] != nullptr
                     && !checkIfEndTag(this->parsedStack[i + 1]->nodeContent)
                 ) {
@@ -109,3 +127,6 @@ std::vector<Node*> Tree::findDirectChildNodes(int currentNodeIndex, int depthLev
 
     return directChildren;
 }
+
+// improvement might need to loop through the direct nodes
+// instead of the entire stack over and over
