@@ -4,50 +4,70 @@
 // and fill the missing info
 void Tree::buildTree()
 {
-    std::vector<std::string> parentStack;
     int currentDepthLevel = 0;
 
-    if ( // initialize the root with the first stack item
-        this->root == nullptr
-        && this->parsedStack.size() > 0
-    ) {
-        this->root = this->parsedStack[0];
-        parentStack.push_back(this->parsedStack[0]->nodeContent); // or use nodeId?
-    }
-
-    for (size_t i = 0; i <= this->parsedStack.size() - 1; ++i) {
+    for (int i = 0; i < this->parsedStack.size(); ++i) {
         Node *currentNode;
 
         // if 2 open tags in a row: parent/child
         if (
             (this->parsedStack[i]->isTagNode && !checkIfEndTag(this->parsedStack[i]->nodeContent))
-            && (this->parsedStack[i + 1]->isTagNode && !checkIfEndTag(this->parsedStack[i + 1]->nodeContent))
+            && (
+                this->parsedStack[i + 1] != nullptr
+                && this->parsedStack[i + 1]->isTagNode
+                && !checkIfEndTag(this->parsedStack[i + 1]->nodeContent)
+            )
         ) {
             currentNode = this->parsedStack[i];
             std::vector<Node*> directChildren = findDirectChildNodes(i, currentDepthLevel, this->parsedStack[i]);
             currentDepthLevel += 1;
             this->parsedStack[i]->depthLevel = currentDepthLevel;
             this->parsedStack[i]->childNodes = directChildren;
+
+            if (this->root == nullptr) {
+                this->root = this->parsedStack[i];
+                this->root->parentNode = nullptr;
+            }
         }
+  
         // if 1 open and 1 text node: --> revise
         // if 2 closed tags in a row: child/parent. Validate the depth level or get rid of check?
-        if (
-            (this->parsedStack[i]->isTagNode && checkIfEndTag(this->parsedStack[i]->nodeContent))
-            && (this->parsedStack[i + 1]->isTagNode && checkIfEndTag(this->parsedStack[i + 1]->nodeContent))
-        ) {
-            std::cout << "2 CLOSED tags in a row" << std::endl;
-        }
-        // if 1 closed and 1 open: siblings
-        if (
-            (this->parsedStack[i]->isTagNode && checkIfEndTag(this->parsedStack[i]->nodeContent))
-            && (this->parsedStack[i + 1]->isTagNode && !checkIfEndTag(this->parsedStack[i + 1]->nodeContent))
-        ) {
-            std::cout << "SIBLINGS" << std::endl;
-            // This might be already done with the findDirectChildNodes function
-        }
+        // if (
+        //     (this->parsedStack[i]->isTagNode && checkIfEndTag(this->parsedStack[i]->nodeContent))
+        //     && (this->parsedStack[i + 1]->isTagNode && checkIfEndTag(this->parsedStack[i + 1]->nodeContent))
+        // ) {
+        //     std::cout << "2 CLOSED tags in a row" << std::endl;
+        // }
+        // // if 1 closed and 1 open: siblings
+        // if (
+        //     (this->parsedStack[i]->isTagNode && checkIfEndTag(this->parsedStack[i]->nodeContent))
+        //     && (this->parsedStack[i + 1]->isTagNode && !checkIfEndTag(this->parsedStack[i + 1]->nodeContent))
+        // ) {
+        //     std::cout << "SIBLINGS" << std::endl;
+        //     // This might be already done with the findDirectChildNodes function
+        // }
         // if 1 text node and 1 closed: gives the text node's parent.
     }
+    checkTree(this->root);
 };
+
+void Tree::checkTree(Node* node)
+{
+    if (node != nullptr) {
+        std::cout << "CURRENT NODE IS " << node->nodeContent << std::endl;
+        if (node->parentNode != nullptr && node->parentNode->nodeType.length()) {
+            std::cout << " Parent is " << node->parentNode->nodeType << std::endl;
+        }
+        
+        if (node->childNodes.size()) {
+            for (int i = 0; i < node->childNodes.size(); ++i) {
+                std::cout << "node->childNodes[i] ------- " << node->childNodes[i]->nodeContent << std::endl;
+                checkTree(node->childNodes[i]);
+            }
+        }
+    }
+    return;
+}
 
 bool Tree::checkIfEndTag(std::string node)
 {
@@ -121,12 +141,11 @@ std::vector<Node*> Tree::findDirectChildNodes(int currentNodeIndex, int depthLev
             }
         }
     }
-    for (int i = 0; i < directChildren.size(); ++i) {
-        std::cout << "DIRECT CHILD IS " << directChildren[i]->nodeType << " Parent is " << directChildren[i]->parentNode->nodeType << std::endl;
-    }
 
     return directChildren;
 }
 
 // improvement might need to loop through the direct nodes
 // instead of the entire stack over and over
+// could we give nodes ids that indicate left or right in the tree
+// to improve speed

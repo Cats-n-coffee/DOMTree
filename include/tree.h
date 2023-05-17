@@ -29,4 +29,5 @@ class Tree
     private:
         bool checkIfEndTag(std::string node);
         std::vector<Node*> findDirectChildNodes(int currentNodeIndex, int depthLevel, Node *parentId);
+        void checkTree(Node* node);
 };
